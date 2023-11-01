@@ -22,9 +22,7 @@ func init() {
 
 func main() {
 	app := fiber.New()
-	micro := fiber.New()
 
-	app.Mount("/api", micro)
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "http://localhost:3000",
@@ -32,7 +30,7 @@ func main() {
 		AllowHeaders:     "Origin, Content-Type, Accept",
 		AllowCredentials: true,
 	}))
-
+	micro := app.Group("/api")
 	micro.Route("/auth", func(router fiber.Router) {
 		router.Post("/register", controller.SignUpUser)
 		router.Post("/login", controller.SignInUser)
@@ -41,7 +39,7 @@ func main() {
 
 	micro.Get("/user/me", middleware.DeserializeUser, controller.Getme)
 
-	micro.Get("/api/healthChecker", func(ctx *fiber.Ctx) error {
+	micro.Get("/healthChecker", func(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 			"status":  "success",
 			"message": "Welcome to Golang, Fiber, and GORM",
